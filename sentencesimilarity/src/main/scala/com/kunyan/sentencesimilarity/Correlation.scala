@@ -1,27 +1,25 @@
 package com.kunyan.sentencesimilarity
 
 import org.apache.spark.rdd.RDD
-
+import breeze.linalg._
 /**
   * Created by wangcao on 2016/10/21.
   */
 object Correlation {
 
-  /**
-    * 计算余弦相似度（vector形式）
-    *
-    * @param vec1 词向量
-    * @param vec2 词向量
-    * @return 余弦相似度的值
-    */
-  def cosineCorr(vec1: Vector[Double], vec2: Vector[Double]): Double = {
-
-    val member = vec1.zip(vec2).map(x => x._1 * x._2).sum
-    val tmp1 =  math.sqrt(vec1.map(num => {math.pow(num, 2)}).sum)
-    val tmp2 =  math.sqrt(vec2.map(num => {math.pow(num, 2)}).sum)
-
-    member / (tmp1 * tmp2)
-  }
+//  /**
+//    * 计算余弦相似度（vector形式）
+//    *
+//    * @param vec1 词向量
+//    * @param vec2 词向量
+//    * @return 余弦相似度的值
+//    */
+//  def cosine(vec1: Vector[Double], vec2: Vector[Double]): Double = {
+//
+//    val fenzi = vec1 dot vec2
+//    val fenmu = norm(vec1) * norm(vec2)
+//
+//  }
 
   /**
     * 计算余弦相似度（RDD形式）

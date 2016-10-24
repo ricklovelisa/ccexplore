@@ -25,7 +25,7 @@ object ComputeCorrByCorr {
 
     var wordCorrelation: RDD[(String,  Double)] = sc.parallelize(Array(null))
 
-    //将每个词与词向量中的词分别两两做余弦相思性计算
+    //将每个词与词向量中的词分别两两做余弦相似性计算
     for (word <- wordStay) {
 
       val selectWord = vec.filter(x => x._1 == word).collect().toMap
