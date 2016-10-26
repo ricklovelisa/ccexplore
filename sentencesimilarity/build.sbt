@@ -8,7 +8,9 @@ scalaVersion := "2.10.4"
 
 libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.5.2"
 
-libraryDependencies += "org.apache.spark" % "spark-mllib_2.10" % "1.5.2"
+libraryDependencies += "org.scalanlp" % "breeze_2.10" % "0.12"
+
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.38"
 
 assemblyMergeStrategy in assembly := {
   case PathList("org", "codehaus", xs @ _*) => MergeStrategy.last
