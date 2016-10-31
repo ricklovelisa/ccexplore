@@ -163,10 +163,14 @@ object Convert {
     * @param vec2 词向量
     * @return 余弦相似度的值
     */
-  def cosine(vec1: Vector[Double], vec2: Vector[Double]): Double = {
+  def cosine(vec1: Array[Double], vec2: Array[Double]): Double = {
 
-    val fenzi = vec1 dot vec2
-    val fenmu = norm(vec1) * norm(vec2)
+    val veca = Vector(vec1)
+    val vecb = Vector(vec2)
+
+    val fenzi = veca dot vecb
+    val fenmu = norm(veca) * norm(vecb)
+    println(fenmu)
 
     fenzi / fenmu
   }
@@ -187,8 +191,8 @@ object Convert {
     // 获取新闻和词向量数据
     val Array(docs, word2Vec) = getAllData
 
-    println(1,docs.map(_.toSeq).toSeq)
-    println(2,word2Vec.map(_(0)).toSeq)
+//    println(1,docs.map(_.toSeq).toSeq)
+//    println(2,word2Vec.map(_(0)).toSeq)
 
     val docsRDD = sc.parallelize(docs)
     val word2VecRDD = sc.parallelize(word2Vec)
@@ -198,20 +202,47 @@ object Convert {
     // 计算词袋和word2vec中的词的交集
     val coWordsBucket = getCoWordsBetweenWordsBagAndWord2Vec(wordsBag, word2Vec.map(_(0)))
 
-    val coWord2Vec = word2VecRDD.filter(x => coWordsBucket.contains(x(0)))
+    val coWord2Vec = word2VecRDD
+      .filter(x => coWordsBucket.contains(x(0)))
+      .map(line => {
 
-    coWord2Vec.foreach(x => println(x.toSeq))
+        val word = line(0)
+        val vec = line(1).split(" ")
+
+        (word, vec.map(_.toDouble))
+      })
+
+    val wordSim = coWord2Vec.cartesian(coWord2Vec)
+      .filter(x => x._1._1 <= x._2._1)
+      .map(x => {
+
+        val pair = Array(x._1._1, x._2._1)
+        val sim = cosine(x._1._2, x._2._2)
+
+        (pair, sim)
+      }).collect().toMap
+
     val coWordsBucketBr = sc.broadcast(coWordsBucket)
     val transformedDoc = transformDoc(docsRDD, coWordsBucketBr)
 
-//
-//    transformedDoc.flatMap(wordInfo => {
-//
-//      val docID = wordInfo._1
-//      val wordIndex = wordInfo._2
-//
-//      wordInfo._3.flatMap()
-//    })
+    val result = transformedDoc.flatMap(wordInfo => {
+
+
+      val docID = wordInfo._1
+      val wordIndex = wordInfo._2
+      val word = wordInfo._3
+
+      val kk = coWordsBucketBr.value.map(row => {
+
+        val wordsPair = Array(row, word).sorted
+
+        (wordSim.getOrElse(wordsPair, "null").toString, (docID, wordIndex))
+      })
+
+      kk
+    })
+
+    result.foreach(println)
   }
 
 }
